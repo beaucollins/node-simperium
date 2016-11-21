@@ -12,13 +12,15 @@ import type {
 	RemoveBucketObjectAction,
 	SaveGhostAction,
 	RemoveGhostAction,
-	ReduxAction
+	ReduxAction,
+	QueueChangeAction
 } from './actions';
 import {
 	BUCKET_OBJECT_SAVE,
 	BUCKET_OBJECT_REMOVE,
 	GHOST_SAVE,
-	GHOST_REMOVE
+	GHOST_REMOVE,
+	BUCKET_QUEUE_CHANGE
 } from './types';
 
 const ghosts = ( state = {}, action: ReduxAction ): Object => {
@@ -53,7 +55,16 @@ const buckets = ( state = {}, action: ReduxAction ): Object => {
 	return state;
 };
 
-const queue = ( state = {}, action: ReduxAction ): Object => {
+const queue = ( state = { pending: {}, sent: {} }, action: ReduxAction ): Object => {
+	switch ( action.type ) {
+		case BUCKET_QUEUE_CHANGE:
+			const queueAction = ( ( action: any ): QueueChangeAction );
+			return set(
+				lensPath( [ 'pending', queueAction.bucket, queueAction.key ] ),
+				{ diff: queueAction.diff, v: queueAction.version },
+				state
+			);
+	}
 	return state;
 };
 
